@@ -1,0 +1,23 @@
+{
+    "name": "mashhadmedia/crm",
+    "description": "سیستم حضور و غیاب ساده — بدون فریمورک، PHP خالص 8.3+",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.3",
+        "endroid/qr-code": "^4.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "db:build": "php tools/build-db.php",
+        "db:seed": "php database/seed.php"
+    }
+}

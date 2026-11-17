@@ -1,1 +1,30 @@
-.vscode
+# IDE
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+public/assets/app.css
+
+# SQLite database
+database/app.sqlite
+database/app.sqlite-journal
+database/app.sqlite-wal
+database/app.sqlite-shm
+
+# Environment
+.env
+
+# Logs
+storage/logs/*.log
+
+# Build artifacts
+composer.lock
