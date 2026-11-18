@@ -23,6 +23,15 @@ use App\Core\View;
                     <p class="text-center text-xs text-base-content/50 mt-1">اطلاعات ورود خود را وارد کنید</p>
                 </div>
 
+                <?php if (($_GET['scan'] ?? '') === '1'): ?>
+                <div class="alert alert-info text-sm py-2.5 gap-2.5" role="status">
+                    <?= View::icon('qr', 'w-5 h-5 shrink-0') ?>
+                    <div class="leading-relaxed">
+                        ورود خود را ثبت کنید — بلافاصله بعد از ورود، حضور شما به‌صورت خودکار ثبت می‌شود.
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <?php if (!empty($errors)): ?>
                 <div class="space-y-2">
                     <?php foreach ($errors as $e): ?>

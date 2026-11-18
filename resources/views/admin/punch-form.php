@@ -43,7 +43,7 @@ use App\Core\View;
                 $jTime    = date('H:i', $punchTs);
                 $jDisplay = $jDate . ' ' . $jTime;
             ?>
-            <input type="text" name="punched_at" required
+            <input type="text" name="punched_at" required data-jdp
                    value="<?= htmlspecialchars($jDisplay, ENT_QUOTES, 'UTF-8') ?>"
                    class="input input-bordered w-full" dir="ltr" placeholder="YYYY/MM/DD HH:MM">
         </div>

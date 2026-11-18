@@ -60,6 +60,12 @@ class AuthController
         RateLimiter::reset('login');
         Auth::login($user);
 
+        // A QR scan was done BEFORE login (guest scanned the wall code with
+        // the native camera) → register that punch automatically now.
+        if (!empty($_SESSION['pending_qr_hash'])) {
+            \App\Controllers\PunchController::resumePendingScan();
+        }
+
         header('Location: /');
         exit;
     }

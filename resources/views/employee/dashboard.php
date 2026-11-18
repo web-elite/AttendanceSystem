@@ -192,10 +192,35 @@ $isIn = $defaultType === 'in';
                 <?php endif; ?>
 
                 <?php if (in_array('location', $allowedMethods, true)): ?>
+                <div data-panel="location" class="<?= count($allowedMethods) === 1 && $allowedMethods[0] === 'location' ? '' : 'hidden' ?>">
+                    <div class="rounded-lg border border-dashed border-base-300 p-3 text-sm text-base-content/60 flex items-center gap-2">
+                        <?= View::icon('pin', 'w-4 h-4 shrink-0') ?>
+                        <span id="geo-status">در حال دریافت موقعیت…</span>
+                    </div>
+                    <div id="geo-retry" class="hidden mt-2">
+                        <button type="button" id="geo-retry-btn"
+                                class="btn btn-sm btn-outline btn-primary w-full">
+                            <?= View::icon('pin', 'w-4 h-4') ?> تلاش دوباره برای دریافت موقعیت
+                        </button>
+                    </div>
+                    <input type="hidden" name="lat" id="lat">
+                    <input type="hidden" name="lng" id="lng">
+                </div>
+                <?php endif; ?>
+
+                <?php if ($geofenceOn && !in_array('location', $allowedMethods, true)): ?>
+                <!-- Geofence is enforced server-side for every punch method — capture
+                     GPS even when "location" is not one of the allowed methods. -->
                 <div data-panel="location" class="hidden">
                     <div class="rounded-lg border border-dashed border-base-300 p-3 text-sm text-base-content/60 flex items-center gap-2">
                         <?= View::icon('pin', 'w-4 h-4 shrink-0') ?>
                         <span id="geo-status">در حال دریافت موقعیت…</span>
+                    </div>
+                    <div id="geo-retry" class="hidden mt-2">
+                        <button type="button" id="geo-retry-btn"
+                                class="btn btn-sm btn-outline btn-primary w-full">
+                            <?= View::icon('pin', 'w-4 h-4') ?> تلاش دوباره برای دریافت موقعیت
+                        </button>
                     </div>
                     <input type="hidden" name="lat" id="lat">
                     <input type="hidden" name="lng" id="lng">
@@ -203,12 +228,23 @@ $isIn = $defaultType === 'in';
                 <?php endif; ?>
 
                 <?php if (in_array('qrcode', $allowedMethods, true)): ?>
-                <div data-panel="qrcode" class="hidden">
-                    <label class="form-control">
+                <div data-panel="qrcode" class="<?= count($allowedMethods) === 1 && $allowedMethods[0] === 'qrcode' ? '' : 'hidden' ?> space-y-3">
+                    <!-- <label class="form-control">
                         <span class="label"><span class="label-text font-medium">کد نمایش‌داده‌شده روی صفحه ورودی</span></span>
                         <input type="text" name="qr_token" id="qr-token" placeholder="کد را اینجا وارد کنید"
                                class="input input-bordered w-full" dir="ltr" autocomplete="off">
                     </label>
+                    <div class="flex items-center gap-2 text-xs text-base-content/50">
+                        <span class="h-px flex-1 bg-base-300"></span>
+                        یا
+                        <span class="h-px flex-1 bg-base-300"></span>
+                    </div> -->
+                    <button type="button" data-qr-camera-btn class="btn btn-outline btn-primary w-full">
+                        <?= View::icon('qr', 'w-5 h-5') ?>
+                        اسکن با دوربین گوشی
+                    </button>
+                    <div id="qr-reader" class="hidden rounded-xl overflow-hidden border border-base-300"></div>
+                    <div id="qr-camera-status" class="hidden text-sm"></div>
                 </div>
                 <?php endif; ?>
 

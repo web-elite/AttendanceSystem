@@ -74,6 +74,6 @@ class Auth
      */
     public static function isAdmin(): bool
     {
-        return $_SESSION['role'] === 'admin';
+        return ($_SESSION['role'] ?? null) === 'admin';
     }
 }

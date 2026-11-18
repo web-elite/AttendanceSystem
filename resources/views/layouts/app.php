@@ -25,6 +25,7 @@ if (!in_array($currentTheme, AuthController::themeWhitelist(), true)) {
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <title><?= htmlspecialchars($title ?? 'حضور و غیاب', ENT_QUOTES, 'UTF-8') ?> — حضور و غیاب</title>
     <link rel="stylesheet" href="/assets/app.css">
+    <link rel="stylesheet" href="/assets/vendor/jalalidatepicker/jalalidatepicker.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -189,6 +190,7 @@ if (!in_array($currentTheme, AuthController::themeWhitelist(), true)) {
 <?= $content ?>
 <?php endif; ?>
 
+<script src="/assets/vendor/jalalidatepicker/jalalidatepicker.min.js"></script>
 <script src="/assets/app.js"></script>
 </body>
 </html>

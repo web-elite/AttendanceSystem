@@ -54,6 +54,12 @@ class Router
             return;
         }
 
+        // --- Camera QR scan (public GET; punches or parks a pending scan) ---
+        if ($route === 'scan' && $method === 'GET') {
+            PunchController::scan();
+            return;
+        }
+
         // --- Employee (auth required) ---
         if (!Auth::check()) {
             header('Location: /login');
@@ -165,7 +171,7 @@ class Router
         $pdo   = Database::conn();
 
         $stmt = $pdo->prepare(
-            "SELECT type, punched_at, method FROM punches WHERE user_id = ? AND date(punched_at, 'localtime') = ? ORDER BY punched_at ASC"
+            "SELECT type, punched_at, method FROM punches WHERE user_id = ? AND date(punched_at) = ? ORDER BY punched_at ASC"
         );
         $stmt->execute([$user->id, $today]);
         $todayPunches = $stmt->fetchAll();
@@ -261,9 +267,11 @@ class Router
      * - X-Frame-Options / frame-ancestors — block clickjacking.
      * - X-XSS-Protection — legacy; kept for older browsers.
      * - Referrer-Policy — don't leak full URLs cross-origin.
-     * - Permissions-Policy — deny camera/geolocation/mic for third-party
-     *   iframes (html5-qrcode uses the camera on the same origin, so it
-     *   keeps working; external frames are blocked).
+     * - Permissions-Policy — camera stays (self) for html5-qrcode on the
+     *   same origin; geolocation MUST be (self) too — `geolocation=()`
+     *   hard-disables the GPS prompt in every browser (Chrome, Safari,
+     *   Firefox) and silently breaks the "موقعیت مکانی" punch method.
+     *   Microphone/payment stay fully denied.
      * - Strict-Transport-Security — HSTS, only on HTTPS so a stray local
      *   or HTTP request never gets pinned to HTTPS.
      * - Content-Security-Policy:
@@ -283,7 +291,7 @@ class Router
             'X-Frame-Options'        => 'SAMEORIGIN',
             'X-XSS-Protection'       => '1; mode=block',
             'Referrer-Policy'        => 'strict-origin-when-cross-origin',
-            'Permissions-Policy'     => 'camera=(self), geolocation=(), microphone=(), payment=()',
+            'Permissions-Policy'     => 'camera=(self), geolocation=(self), microphone=(), payment=()',
             'Content-Security-Policy' => implode('; ', [
                 "default-src 'self'",
                 "base-uri 'self'",

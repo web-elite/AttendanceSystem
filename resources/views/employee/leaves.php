@@ -19,7 +19,7 @@ use App\Core\View;
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="label"><span class="label-text">نوع</span></label>
-                        <select name="type" class="select select-bordered w-full">
+                        <select name="type" class="select select-bordered w-full" data-leave-type>
                             <option value="hourly">ساعتی</option>
                             <option value="daily">روزانه</option>
                         </select>
@@ -27,11 +27,13 @@ use App\Core\View;
                     <div>
                         <label class="label"><span class="label-text">شروع</span></label>
                         <input type="text" name="start_at" placeholder="YYYY/MM/DD"
+                               data-jdp data-jdp-only-date autocomplete="off"
                                class="input input-bordered w-full">
                     </div>
                     <div>
                         <label class="label"><span class="label-text">پایان</span></label>
                         <input type="text" name="end_at" placeholder="YYYY/MM/DD"
+                               data-jdp data-jdp-only-date autocomplete="off"
                                class="input input-bordered w-full">
                     </div>
                 </div>

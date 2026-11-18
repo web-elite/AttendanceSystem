@@ -72,6 +72,71 @@ class QrService
     }
 
     /**
+     * Returns the absolute base URL used to build the QR scan links
+     * (scheme + host, no trailing slash).
+     *
+     * Prefers the current request's host so the link always matches the
+     * domain employees actually use; falls back to config app_url when
+     * running from the CLI or on localhost (e.g. LAN dev needs APP_URL
+     * pointing at the machine's LAN address for phone scanning).
+     */
+    public static function baseUrl(): string
+    {
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $localHosts = ['localhost', '127.0.0.1', '[::1]', 'localhost:8080', '127.0.0.1:8080'];
+        if ($host !== '' && !in_array($host, $localHosts, true)) {
+            $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || ($_SERVER['SERVER_PORT'] ?? 80) === 443;
+            return ($https ? 'https' : 'http') . '://' . $host;
+        }
+        $config = require dirname(__DIR__, 2) . '/config.php';
+        return rtrim((string) ($config['app_url'] ?? ''), '/');
+    }
+
+    /**
+     * Extracts the punch token from either a bare token string or a full
+     * scanned URL ("/scan?t=..."), so pasting either one works.
+     */
+    public static function extractToken(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw !== '' && (str_contains($raw, '://') || str_starts_with($raw, '/'))) {
+            $query = parse_url($raw, PHP_URL_QUERY);
+            if ($query !== null && $query !== false) {
+                parse_str($query, $params);
+                if (!empty($params['t']) && is_string($params['t'])) {
+                    return trim($params['t']);
+                }
+            }
+        }
+        return $raw;
+    }
+
+    /**
+     * Verifies any punch token — rotating ("nonce|expiry") or static —
+     * after URL extraction. Returns the hash to store, or false.
+     */
+    public static function verifyAny(string $raw): string|false
+    {
+        $token = self::extractToken($raw);
+        if ($token === '') {
+            return false;
+        }
+
+        // Rotating tokens carry the "nonce|expiry" shape
+        if (str_contains($token, '|')) {
+            return self::verifyToken($token);
+        }
+
+        // Static mode: compare against the stored static token
+        $static = Config::str('qr_static_token', '');
+        if ($static === '' || !hash_equals($static, $token)) {
+            return false;
+        }
+        return hash_hmac('sha256', 'static|' . $token, Config::str('secret_key', 'default'));
+    }
+
+    /**
      * Generates a static QR token for the static mode.
      */
     public static function generateStaticToken(): string

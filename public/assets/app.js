@@ -137,7 +137,16 @@
     function initPunchForm() {
         var radios = document.querySelectorAll('input[type="radio"][data-punch-method]');
         var sel = document.querySelector('select[data-punch-method]');
-        if (!radios.length && !sel) return;
+        // No radios / select → single fixed method. Start GPS capture when
+        // the location panel is present (always visible for a forced
+        // location method, hidden but required whenever the geofence is
+        // on) — the server enforces the geofence rule either way.
+        var latInput = document.getElementById('lat');
+        var lngInput = document.getElementById('lng');
+        var locationPanel = document.querySelector('[data-panel="location"]');
+        var forceGeo = !!(latInput && lngInput && locationPanel);
+        var geoRequested = false;
+        if (!radios.length && !sel && !forceGeo) return;
 
         var panels = {
             location: document.querySelector('[data-panel="location"]'),
@@ -159,38 +168,74 @@
         if (sel) sel.addEventListener('change', sync);
         sync();
 
-        // Geolocation capture for the "location" method
-        var latInput = document.getElementById('lat');
-        var lngInput = document.getElementById('lng');
+        // Geolocation capture for the "location" method (or geofence on)
         var geoStatus = document.getElementById('geo-status');
-        var geoRequested = false;
+        var geoRetryBox = document.getElementById('geo-retry');
+        var geoRetryBtn = document.getElementById('geo-retry-btn');
 
+        function setGeoStatus(text, isError) {
+            if (!geoStatus) return;
+            geoStatus.textContent = text;
+            var box = geoStatus.closest('div');
+            if (box) {
+                box.classList.toggle('border-error/40', !!isError);
+                box.classList.toggle('text-error', !!isError);
+                box.classList.toggle('text-base-content/60', !isError);
+            }
+            if (geoRetryBox) geoRetryBox.classList.toggle('hidden', !isError);
+        }
+
+        // Distinguish WHY the fix failed so the message tells the employee
+        // exactly what to do (turn on GPS / allow the prompt / use HTTPS).
         function requestGeo() {
-            if (geoRequested || !navigator.geolocation) return;
+            if (!navigator.geolocation) {
+                setGeoStatus('مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند — از ثبت سریع استفاده کنید.', true);
+                return;
+            }
+            if (geoRequested) return;
             geoRequested = true;
-            if (geoStatus) geoStatus.textContent = 'در حال دریافت موقعیت…';
+            setGeoStatus('در حال دریافت موقعیت…', false);
             navigator.geolocation.getCurrentPosition(
                 function (pos) {
                     if (latInput) latInput.value = pos.coords.latitude;
                     if (lngInput) lngInput.value = pos.coords.longitude;
-                    if (geoStatus) {
-                        geoStatus.textContent =
-                            'موقعیت ثبت شد: ' +
-                            toFaDigits(pos.coords.latitude.toFixed(4)) +
-                            '، ' +
-                            toFaDigits(pos.coords.longitude.toFixed(4));
+                    setGeoStatus(
+                        'موقعیت ثبت شد: ' +
+                        toFaDigits(pos.coords.latitude.toFixed(4)) +
+                        '، ' +
+                        toFaDigits(pos.coords.longitude.toFixed(4)),
+                        false
+                    );
+                },
+                function (err) {
+                    geoRequested = false; // allow retry via the button / re-select
+                    var msg;
+                    switch (err && err.code) {
+                        case 1: // PERMISSION_DENIED
+                            msg = 'دسترسی به موقعیت رد شد — در نوار آدرس مرورگر اجازه «موقعیت مکانی» را بدهید و دوباره تلاش کنید.';
+                            break;
+                        case 2: // POSITION_UNAVAILABLE
+                            msg = 'موقعیت دریافت نشد — GPS گوشی را روشن کنید و دوباره تلاش کنید.';
+                            break;
+                        case 3: // TIMEOUT
+                            msg = 'دریافت موقعیت طول کشید — دوباره تلاش کنید.';
+                            break;
+                        default:
+                            msg = 'دسترسی به موقعیت ممکن نیست — دوباره تلاش کنید.';
                     }
+                    setGeoStatus(msg, true);
                 },
-                function () {
-                    geoRequested = false;
-                    if (geoStatus) geoStatus.textContent = 'دسترسی به موقعیت ممکن نیست — دوباره تلاش کنید.';
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
             );
         }
 
-        // As soon as the location panel is visible, start capturing
-        if (panels.location && !panels.location.classList.contains('hidden')) {
+        if (geoRetryBtn) {
+            geoRetryBtn.addEventListener('click', requestGeo);
+        }
+
+        // As soon as the location panel is visible (or GPS is required by
+        // the server), start capturing
+        if (forceGeo || (locationPanel && !locationPanel.classList.contains('hidden'))) {
             requestGeo();
         }
         radios.forEach(function (r) {
@@ -383,6 +428,56 @@
         }
     }
 
+    /* ─── JalaliDatePicker (@majidh1/jalalidatepicker, self-hosted) ──
+     * Inputs opt in via [data-jdp]. Per-input behavior comes from the
+     * library's data-jdp-* attributes; page-level toggling (e.g. leave
+     * hourly/daily) re-reads those attributes when the type changes. */
+    function initJalaliDatePicker() {
+        // The library exposes a plain object (not a function) with
+        // startWatch/hide/updateOptions methods.
+        if (!window.jalaliDatepicker || typeof window.jalaliDatepicker.startWatch !== 'function') return;
+
+        // Time is enabled globally; date-only fields opt out per-input via
+        // [data-jdp-only-date] and time-only via [data-jdp-only-time] — the
+        // library re-evaluates those attrs per show() (see src getters).
+        window.jalaliDatepicker.startWatch({
+            minDate: 'attr',
+            maxDate: 'attr',
+            // NOTE: do NOT pass initDate:'attr' — it breaks v1.0.0 grid
+            // rendering for empty inputs; the default (today / input value)
+            // already matches our needs.
+            hasSecond: 'attr',
+            // Keep picker open after a day click when time is active, so the
+            // user still picks hour/minute; it hides on outside click.
+            hideAfterChangeWithTime: false,
+            persianDigits: true,
+            date: true,
+            time: true
+        });
+
+        // Leave request form: hourly → date+time, daily → date only.
+        // The library reads [data-jdp-only-date] per show(), so toggling the
+        // attribute is enough; "datetime" is the library default for a time-
+        // enabled picker without only-date/only-time attrs.
+        var typeSel = document.querySelector('select[name="type"][data-leave-type]');
+        var startIn = document.querySelector('input[name="start_at"][data-jdp]');
+        var endIn   = document.querySelector('input[name="end_at"][data-jdp]');
+        function syncLeaveType() {
+            if (!typeSel || !startIn || !endIn) return;
+            var hourly = typeSel.value === 'hourly';
+            [startIn, endIn].forEach(function (inp) {
+                inp.toggleAttribute('data-jdp-only-date', !hourly);
+            });
+            window.jalaliDatepicker.hide();
+            startIn.value = '';
+            endIn.value = '';
+        }
+        if (typeSel) {
+            typeSel.addEventListener('change', syncLeaveType);
+            syncLeaveType();
+        }
+    }
+
     /* ─── Boot ──────────────────────────────────────────────── */
 
     function init() {
@@ -396,6 +491,7 @@
         initNeshanMap();
         initQrPage();
         initSettingsForm();
+        initJalaliDatePicker();
     }
 
     if (document.readyState === 'loading') {

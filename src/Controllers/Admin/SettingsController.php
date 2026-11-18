@@ -53,11 +53,17 @@ class SettingsController
             $expiresIn = \App\Core\Config::int('qr_ttl_seconds', 60);
         }
 
+        // The QR encodes a full URL so the phone's BUILT-IN camera (or any
+        // QR app) can open it — no in-app scanner needed.
+        $baseUrl  = QrService::baseUrl();
+        $scanUrl  = $baseUrl . '/scan?t=' . rawurlencode($token);
+
         return view('admin.qr', [
             'qrMode'    => $mode,
             'token'     => $token,
+            'scanUrl'   => $scanUrl,
             'expiresIn' => $expiresIn,
-            'dataUri'   => QrService::qrDataUri($token),
+            'dataUri'   => QrService::qrDataUri($scanUrl),
         ]);
     }
 

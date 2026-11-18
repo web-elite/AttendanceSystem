@@ -1,5 +1,5 @@
 <?php
-// Variables: $qrMode (rotating|static), $token (raw token), $expiresIn (seconds|null), $dataUri
+// Variables: $qrMode (rotating|static), $token (raw token), $scanUrl (full URL), $expiresIn (seconds|null), $dataUri
 use App\Core\View;
 ?>
 <div class="space-y-6 print:!hidden" data-qr-page>
@@ -22,9 +22,13 @@ use App\Core\View;
                          data-qr-img>
                 </div>
                 <p class="text-sm font-semibold mt-4">ثبت ورود و خروج با اسکن کد QR</p>
-                <p class="text-xs text-base-content/50 leading-relaxed max-w-sm">
-                    کارمند در صفحه داشبورد خود گزینه «اسکن کد QR» را می‌زند و دوربین گوشی را روی این کد نگه می‌دارد.
+                <p class="text-xs text-base-content/50 leading-relaxed max-w-md">
+                    کارمند کافیست با <strong>دوربین معمولی گوشی</strong> (دوربین خود گوشی یا هر برنامه اسکنر) این کد را اسکن کند؛ لینک باز می‌شود و اگر لاگین باشد ورود/خروجش خودکار ثبت می‌شود، اگر لاگین نباشد ابتدا وارد حسابش می‌شود و بعد ثبت انجام می‌گیرد.
                 </p>
+                <div class="w-full max-w-md mt-2">
+                    <div class="text-[11px] text-base-content/40 mb-1">لینک داخل کد (برای تست دستی):</div>
+                    <code class="block w-full text-[11px] bg-base-200 rounded-lg px-3 py-2 break-all" dir="ltr"><?= htmlspecialchars($scanUrl, ENT_QUOTES, 'UTF-8') ?></code>
+                </div>
             </div>
         </div>
 
@@ -84,7 +88,7 @@ use App\Core\View;
 <!-- Print-only sheet (everything else hides when printing) -->
 <div class="hidden print:block text-center" dir="rtl">
     <h1 class="text-2xl font-black mb-1">ثبت ورود و خروج</h1>
-    <p class="text-sm mb-6">دوربین گوشی را روی کد زیر بگیرید</p>
+    <p class="text-sm mb-6">با دوربین گوشی کد زیر را اسکن کنید</p>
     <img src="<?= htmlspecialchars($dataUri, ENT_QUOTES, 'UTF-8') ?>"
          alt="کد QR"
          class="w-[9cm] h-[9cm] mx-auto object-contain">

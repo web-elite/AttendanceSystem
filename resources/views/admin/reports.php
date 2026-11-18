@@ -25,12 +25,14 @@ use App\Core\View;
                 <div>
                     <label class="label"><span class="label-text">از تاریخ (شمسی)</span></label>
                     <input type="text" name="from" value="<?= htmlspecialchars($filters['from'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="۱۴۰۵/۰۸/۰۱" dir="ltr" class="input input-bordered">
+                           placeholder="۱۴۰۵/۰۸/۰۱" dir="ltr" class="input input-bordered"
+                           data-jdp data-jdp-only-date autocomplete="off">
                 </div>
                 <div>
                     <label class="label"><span class="label-text">تا تاریخ (شمسی)</span></label>
                     <input type="text" name="to" value="<?= htmlspecialchars($filters['to'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="۱۴۰۵/۰۸/۳۱" dir="ltr" class="input input-bordered">
+                           placeholder="۱۴۰۵/۰۸/۳۱" dir="ltr" class="input input-bordered"
+                           data-jdp data-jdp-only-date autocomplete="off">
                 </div>
                 <div class="flex gap-2">
                     <button type="submit" class="btn btn-primary">

@@ -86,11 +86,12 @@ $val = fn(?string $key): string => htmlspecialchars((string) ($user[$key] ?? '')
         ];
         foreach ($profileFields as $key => [$label, $type, $placeholder, $dir]):
             $v = $key === 'birth_date' ? $birthJalali : $val($key);
+            $jdpAttr = $key === 'birth_date' ? ' data-jdp data-jdp-only-date autocomplete="off"' : '';
         ?>
         <div class="form-control">
             <label class="label"><span class="label-text"><?= $label ?> <span class="text-base-content/30 text-[10px]">(دلخواه)</span></span></label>
             <input type="<?= $type ?>" name="<?= $key ?>" placeholder="<?= $placeholder ?>"
-                   value="<?= $v ?>"<?= $dir === 'ltr' ? ' dir="ltr"' : '' ?>
+                   value="<?= $v ?>"<?= $dir === 'ltr' ? ' dir="ltr"' : '' ?><?= $jdpAttr ?>
                    class="input input-bordered w-full">
         </div>
         <?php endforeach; ?>

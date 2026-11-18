@@ -36,12 +36,14 @@ $activePreset = $_GET['preset'] ?? '';
                 <div>
                     <label class="label"><span class="label-text">از تاریخ (شمسی)</span></label>
                     <input type="text" name="from" value="<?= htmlspecialchars($filters['from'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="۱۴۰۵/۰۸/۲۰" dir="ltr" class="input input-bordered w-full">
+                           placeholder="۱۴۰۵/۰۸/۲۰" dir="ltr" class="input input-bordered w-full"
+                           data-jdp data-jdp-only-date autocomplete="off">
                 </div>
                 <div>
                     <label class="label"><span class="label-text">تا تاریخ (شمسی)</span></label>
                     <input type="text" name="to" value="<?= htmlspecialchars($filters['to'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                           placeholder="۱۴۰۵/۰۸/۲۶" dir="ltr" class="input input-bordered w-full">
+                           placeholder="۱۴۰۵/۰۸/۲۶" dir="ltr" class="input input-bordered w-full"
+                           data-jdp data-jdp-only-date autocomplete="off">
                 </div>
                 <div>
                     <label class="label"><span class="label-text">کارمند</span></label>

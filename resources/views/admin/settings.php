@@ -37,14 +37,16 @@ $geofenceOn = ($settings['geofence_enabled'] ?? '0') === '1';
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="form-control">
                 <label class="label"><span class="label-text">شروع کار (ساعت ورود)</span></label>
-                <input type="time" name="min_in_time"
+                <input type="text" name="min_in_time"
                        value="<?= htmlspecialchars($settings['min_in_time'] ?? '09:00', ENT_QUOTES, 'UTF-8') ?>"
+                       data-jdp data-jdp-only-time autocomplete="off"
                        class="input input-bordered w-full">
             </div>
             <div class="form-control">
                 <label class="label"><span class="label-text">پایان کار (ساعت خروج)</span></label>
-                <input type="time" name="max_out_time"
+                <input type="text" name="max_out_time"
                        value="<?= htmlspecialchars($settings['max_out_time'] ?? '17:00', ENT_QUOTES, 'UTF-8') ?>"
+                       data-jdp data-jdp-only-time autocomplete="off"
                        class="input input-bordered w-full">
             </div>
             <div class="form-control">
